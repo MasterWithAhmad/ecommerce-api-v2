@@ -17,10 +17,26 @@ exports.registerUser = async (userData) => {
         throw new Error("User already exists");
     }
 
-    // Hash the password
+    // Hash the password and create a new user
     const hashedPassword = await bcrypt.hash(password, 10);
-
-    // Create the user
     const newUser = await User.create({ email, password: hashedPassword, name });
+
     return newUser;
+};
+
+exports.loginUser = async (email, password) => {
+    // Find user by email
+    const user = await User.findOne({ email });
+    if (!user) {
+        throw new Error("User not found");
+    }
+
+    // Compare hashed password
+    const isPasswordMatch = await bcrypt.compare(password, user.password);
+    if (!isPasswordMatch) {
+        throw new Error("Invalid credentials");
+    }
+
+    // Return user object
+    return user;
 };
